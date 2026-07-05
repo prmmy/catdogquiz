@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สัตว์เลี้ยงของคุณ จะได้รับบทเป็นใครในซีรีส์?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #FDFBF7; 
+            --text-color: #533422; 
+            --primary-btn: #C2A878; 
+            --primary-btn-hover: #A68A64;
+            --card-bg: #FFFFFF;
+            --input-border: #E0D8C3;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            max-width: 500px;
+            width: 100%;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+            display: none; 
+            box-sizing: border-box;
+        }
+
+        #result.container { background-color: transparent; box-shadow: none; padding: 0; }
+        .active { display: block; animation: fadeIn 0.5s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { font-weight: 600; margin-bottom: 20px; font-size: 1.3rem; line-height: 1.5; color: var(--text-color); }
+        p { font-weight: 300; margin-bottom: 30px; line-height: 1.6; color: var(--text-color); }
+
+        /* การ์ดเลือกสัตว์เลี้ยง */
+        .selection-container { display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
+        .pet-card {
+            background-color: #FFFFFF; border: 2px solid var(--input-border);
+            border-radius: 16px; padding: 25px 15px; width: 48%; cursor: pointer;
+            transition: all 0.3s ease; text-align: center; box-sizing: border-box;
+        }
+        .pet-card:hover {
+            border-color: var(--primary-btn); transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(83, 52, 34, 0.08);
+        }
+        .pet-emoji { font-size: 50px; margin-bottom: 10px; }
+        .pet-title { font-size: 1.1rem; font-weight: 600; color: var(--text-color); }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 400; font-size: 0.95rem; }
+        
+        .input-field {
+            width: 100%; padding: 12px 15px; border: 2px solid var(--input-border);
+            border-radius: 12px; font-family: 'Prompt', sans-serif; font-size: 1rem;
+            color: var(--text-color); box-sizing: border-box; transition: border-color 0.3s;
+            background-color: #FFF;
+        }
+        .input-field:focus { outline: none; border-color: var(--primary-btn); }
+
+        .age-container { display: flex; gap: 10px; }
+        select.input-field { cursor: pointer; appearance: auto !important; }
+        input[type="range"] { width: 100%; accent-color: var(--primary-btn); margin-top: 10px; cursor: pointer; }
+
+        .file-upload {
+            border: 2px dashed var(--input-border); padding: 20px; text-align: center;
+            border-radius: 12px; cursor: pointer; margin-bottom: 20px; display: block;
+        }
+        .file-upload input[type="file"] { display: none; }
+        .preview-image { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: none; margin-top: 10px; }
+        .upload-success { color: #8F7B61; font-weight: 400; display: none; margin-top: 10px; font-size: 0.9rem; text-decoration: underline;}
+
+        .choice-btn {
+            display: block; width: 100%; background-color: var(--bg-color); color: var(--text-color);
+            border: 2px solid transparent; padding: 15px; margin-bottom: 15px; border-radius: 12px;
+            font-size: 1rem; font-family: 'Prompt', sans-serif; cursor: pointer; text-align: left;
+        }
+        .choice-btn:hover { border-color: var(--primary-btn); background-color: #FFF; }
+
+        .primary-btn {
+            background-color: var(--text-color); color: #FFF; border: none; padding: 15px 30px;
+            border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; 
+            width: 100%; margin-top: 10px; font-family: 'Prompt', sans-serif; display: inline-block; box-sizing: border-box; text-align: center; text-decoration: none;
+        }
+
+        .secondary-btn {
+            background-color: #FFF; color: var(--text-color); border: 2px solid var(--text-color); padding: 13px 30px;
+            border-radius: 12px; font-size: 1.05rem; font-weight: 600; cursor: pointer; 
+            width: 100%; margin-bottom: 15px; font-family: 'Prompt', sans-serif; display: inline-block; box-sizing: border-box; text-align: center;
+        }
+
+        #capture-area {
+            position: relative; background-color: #FDFBF7; padding: 50px 20px; display: flex; flex-direction: column;
+            align-items: center; gap: 20px; width: 100%; max-width: 450px; margin: 0 auto 25px auto; box-sizing: border-box;
+            overflow: hidden; border-radius: 20px;
+        }
+
+        .bg-pattern { position: absolute; font-size: 80px; opacity: 0.08; z-index: 1; pointer-events: none; }
+        .pattern-1 { top: 5%; left: -5%; transform: rotate(-15deg); font-size: 100px; }
+        .pattern-2 { top: 15%; right: -5%; transform: rotate(20deg); font-size: 120px; }
+        .pattern-3 { bottom: 25%; left: -10%; transform: rotate(10deg); font-size: 110px; }
+        .pattern-4 { bottom: 5%; right: -5%; transform: rotate(-25deg); font-size: 90px; }
+
+        .result-box-1 {
+            background-color: #FFFFFF; border-radius: 24px; padding: 30px 20px; width: 100%; max-width: 320px;
+            box-shadow: 0 10px 30px rgba(83, 52, 34, 0.06); position: relative; z-index: 2; text-align: center; box-sizing: border-box;
+        }
+        .result-box-1 .hole { width: 40px; height: 6px; background-color: #F0EBE1; border-radius: 10px; margin: 0 auto 20px; }
+        .result-box-1 .title-name { font-size: 1.1rem; font-weight: 300; margin-bottom: 5px; color: var(--text-color); }
+        .result-box-1 .title-role { font-size: 1.6rem; font-weight: 600; margin-bottom: 25px; color: var(--text-color); }
+        
+        .result-image-wrapper { position: relative; width: 100%; max-width: 220px; aspect-ratio: 1/1; margin: 0 auto; }
+        .result-image-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+        .result-image-wrapper .sticker { position: absolute; bottom: -15px; right: -15px; font-size: 45px; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.1)); }
+
+        .result-box-2 {
+            background-color: #FFFFFF; border-radius: 16px; padding: 25px 20px; width: 100%; max-width: 320px;
+            box-shadow: 0 8px 25px rgba(83, 52, 34, 0.04); position: relative; z-index: 2; text-align: center;
+            font-size: 1.05rem; line-height: 1.7; color: var(--text-color); box-sizing: border-box;
+        }
+        .result-box-3 {
+            background-color: #F1ECE3; border-radius: 16px; padding: 20px; width: 100%; max-width: 320px;
+            position: relative; z-index: 2; text-align: center; font-size: 1.05rem; color: var(--text-color); box-sizing: border-box;
+        }
+        .result-box-3 strong { display: block; font-size: 1.1rem; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- หน้า 0: เลือกจักรวาลสัตว์เลี้ยง -->
+    <div id="selection" class="container active">
+        <h2>ผู้เข้าประกวดวันนี้คือใคร? 🎬</h2>
+        <p>เลือกจักรวาลที่คุณต้องการพาไปแคสติ้งได้เลย!</p>
+        
+        <div class="selection-container">
+            <div class="pet-card" onclick="selectPet('cat')">
+                <div class="pet-emoji">🐱</div>
+                <div class="pet-title">น้องแมว</div>
+            </div>
+            <div class="pet-card" onclick="selectPet('dog')">
+                <div class="pet-emoji">🐶</div>
+                <div class="pet-title">น้องหมา</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้า 1: ใส่ข้อมูล (ใช้ร่วมกัน) -->
+    <div id="intro" class="container">
+        <h2>สร้างโปรไฟล์นักแสดง 🎬✨</h2>
+        <p>ขอทำความรู้จักว่าที่ซุปตาร์ก่อนเริ่มควิซนะ!</p>
+        
+        <label class="file-upload">
+            <input type="file" accept="image/*" id="petPhoto" onchange="previewImage(event)">
+            <span id="uploadText">📸 กดเพื่ออัปโหลดรูปน้อง</span>
+            <img id="imagePreview" class="preview-image" src="" alt="Preview">
+            <div id="uploadSuccess" class="upload-success">แตะที่รูปเพื่อเปลี่ยนรูปใหม่</div>
+        </label>
+
+        <div class="input-group">
+            <label>ชื่อน้อง *</label>
+            <input type="text" id="petName" class="input-field" placeholder="เช่น โบ้, ลัคกี้, เต้าหู้">
+        </div>
+
+        <div class="input-group">
+            <label>อายุน้อง *</label>
+            <div class="age-container">
+                <select id="petAgeYear" class="input-field">
+                    <option value="" disabled selected>เลือกปี</option>
+                    <option value="0">0 ปี</option>
+                    <option value="1">1 ปี</option>
+                    <option value="2">2 ปี</option>
+                    <option value="3">3 ปี</option>
+                    <option value="4">4 ปี</option>
+                    <option value="5">5 ปี</option>
+                    <option value="6">6 ปี</option>
+                    <option value="7">7 ปี</option>
+                    <option value="8">8 ปี</option>
+                    <option value="9">9 ปี</option>
+                    <option value="10">10+ ปี</option>
+                </select>
+                <select id="petAgeMonth" class="input-field">
+                    <option value="" disabled selected>เลือกเดือน</option>
+                    <option value="0">0 เดือน</option>
+                    <option value="1">1 เดือน</option>
+                    <option value="2">2 เดือน</option>
+                    <option value="3">3 เดือน</option>
+                    <option value="4">4 เดือน</option>
+                    <option value="5">5 เดือน</option>
+                    <option value="6">6 เดือน</option>
+                    <option value="7">7 เดือน</option>
+                    <option value="8">8 เดือน</option>
+                    <option value="9">9 เดือน</option>
+                    <option value="10">10 เดือน</option>
+                    <option value="11">11 เดือน</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>สายพันธุ์ *</label>
+            <input type="text" id="petBreed" class="input-field" placeholder="เช่น ชิวาวา, เปอร์เซีย">
+        </div>
+
+        <div class="input-group">
+            <label>น้ำหนัก: <span id="weightDisplay">10.0</span> กก.</label>
+            <input type="range" id="petWeight" min="1.0" max="40.0" step="0.5" value="10.0" oninput="updateWeightDisplay(this.value)">
+        </div>
+        
+        <div class="input-group">
+            <label>โรคประจำตัว <span style="font-weight: 300; opacity: 0.7;">(ถ้าไม่มีให้ใส่ -)</span></label>
+            <input type="text" id="petDisease" class="input-field" placeholder="เช่น โรคผิวหนัง, โรคไต">
+        </div>
+
+        <div class="input-group">
+            <label>อาหารที่กินประจำตอนนี้ *</label>
+            <input type="text" id="petFood" class="input-field" placeholder="ยี่ห้อ หรือ สูตรอาหาร">
+        </div>
+
+        <button type="button" class="primary-btn" onclick="startQuiz()">เริ่มแคสติ้งบทบาทเลย! ✨</button>
+    </div>
+
+    <!-- หน้าคำถาม (ใช้ร่วมกัน แบบ Dynamic) -->
+    <div id="quiz-container" class="container">
+        <h2 id="question-text">1. คำถามจะแสดงตรงนี้</h2>
+        <button type="button" class="choice-btn" id="btn-A" onclick="nextQuestion('A')">ตัวเลือก A</button>
+        <button type="button" class="choice-btn" id="btn-B" onclick="nextQuestion('B')">ตัวเลือก B</button>
+        <button type="button" class="choice-btn" id="btn-C" onclick="nextQuestion('C')">ตัวเลือก C</button>
+        <button type="button" class="choice-btn" id="btn-D" onclick="nextQuestion('D')">ตัวเลือก D</button>
+    </div>
+
+    <!-- หน้าคั่น -->
+    <div id="bridge" class="container">
+        <h2>🎉 แคสติ้งเสร็จเรียบร้อย! 🎬</h2>
+        <p id="bridge-text">อยากหาเพื่อนหรือคนที่ปรึกษาเรื่องน้องมั้ย<br>แวะสแกน QR Code เข้า OpenChat ก่อนได้นะ!</p>
+        
+        <img id="bridge-qr" src="" alt="QR Code OpenChat" style="width: 200px; height: 200px; object-fit: cover; border-radius: 15px; margin: 0 auto 20px; display: block; border: 2px solid #E0D8C3; padding: 10px; background-color: #FFF;">
+        
+        <div style="margin-top: -10px; margin-bottom: 20px;">
+            <a id="bridge-link" href="#" target="_blank" style="font-size: 0.85rem; color: #8F7B61; text-decoration: underline;">หรือคลิกที่นี่เพื่อเข้ากลุ่ม</a>
+        </div>
+        
+        <button type="button" class="primary-btn" onclick="showResult()">เปิดบทนักแสดงของฉันเลย ✨</button>
+    </div>
+
+    <!-- หน้าผลลัพธ์ -->
+    <div id="result" class="container">
+        <div id="capture-area">
+            <div id="bg-emoji-1" class="bg-pattern pattern-1">🐾</div>
+            <div id="bg-emoji-2" class="bg-pattern pattern-2">🐾</div>
+            <div id="bg-emoji-3" class="bg-pattern pattern-3">🐾</div>
+            <div id="bg-emoji-4" class="bg-pattern pattern-4">🐾</div>
+
+            <div class="result-box-1">
+                <div class="hole"></div>
+                <div class="title-name"><span id="res-name">น้อง</span> is......</div>
+                <div class="title-role" id="res-title">บทบาท</div>
+                
+                <div class="result-image-wrapper">
+                    <img id="res-photo" src="https://via.placeholder.com/200x200?text=No+Image" alt="Pet Photo">
+                    <div id="res-sticker" class="sticker">🐾</div>
+                </div>
+            </div>
+
+            <div class="result-box-2" id="res-desc">คำอธิบายบุคลิกตัวละครจะมาแสดงตรงนี้</div>
+
+            <div class="result-box-3">
+                <strong>วิธีการเอาใจ:</strong>
+                <span id="res-tips">ทริคจะแสดงตรงนี้</span>
+            </div>
+        </div>
+
+        <div style="padding: 0 20px;">
+            <button type="button" class="secondary-btn" onclick="downloadImage()">📸 บันทึกรูปลงเครื่อง</button>
+            <a id="res-link" href="#" class="primary-btn" target="_blank">จอย OpenChat คลิก!</a>
+        </div>
+    </div>
+
+    <script>
+        // ----------------- คลังข้อมูลแยกตามประเภท (แกสามารถแก้ไขข้อความตรงนี้ได้เลย) -----------------
+        const quizData = {
+            dog: {
+                label: "น้องหมา",
+                emoji: "🐶",
+                qrCode: "qr-dog.jpg", // เปลี่ยนชื่อไฟล์รูป QR หมา
+                openChatLink: "ลิงก์โอเพ่นแชทหมา", // ใส่ลิงก์หมา
+                questions: [
+                    { q: "เวลาคุณกำลังกินข้าว หรือกินขนม น้องหมา จะ...", A: "นั่งจ้องหน้าน้ำลายสอ กดดันแบบนิ่งๆ", B: "เอาคางมาเกยตัก ทำตาปริบๆ ขอชิมด้วย", C: "นอนรออยู่ข้างเท้าเงียบๆ เผื่อมีของตก", D: "ตะกุยตะกาย ส่งเสียงร้อง จะกินด้วยให้ได้!" },
+                    { q: "เวลาทำของพัง หรือทำผิด น้องหมา จะแสดงอาการยังไง?", A: "นั่งนิ่งๆ หน้าตึง ทำเหมือนไม่มีอะไรเกิดขึ้น", B: "หูลู่ หางตก ทำหน้าจ๋อยสุดๆ จนด่าไม่ลง", C: "แกล้งตาย หรือนอนหงายโชว์พุงยอมแพ้แต่โดยดี", D: "วิ่งหนีหน้าตั้ง แถมคาบหลักฐานติดปากไปด้วย!" },
+                    { q: "ถ้ามีคนแปลกหน้าหรือคนส่งพัสดุมาหน้าบ้าน...", A: "เห่าเสียงดัง ขู่ปกป้องบ้านไว้ก่อน!", B: "วิ่งไปรับหน้า หางกระดิกดิ๊กๆ ต้อนรับทุกคน", C: "แอบดูอยู่ห่างๆ หรือหลบอยู่หลังขาเจ้าของ", D: "กระโดดใส่ ตะกุยรั้วด้วยความตื่นเต้นจนห้ามไม่อยู่" },
+                    { q: "ท่านอนประจำของ น้องหมา คือ...", A: "นอนยืดตัวยาวขวางประตู หรือขวางทางเดิน", B: "เบียดตัวมานอนซบ นอนเกยเจ้าของตลอดเวลา", C: "ขดตัวกลมเป็นโดนัทอยู่ในที่นอนของตัวเอง", D: "นอนหงายเงิบ อ้าซ่าโชว์พุง หมดสภาพ" }
+                ],
+                results: {
+                    A: { title: "จ่าฝูงมาดขรึม", desc: "ดูน่าเกรงขาม ปกป้องบ้านเก่งสุดๆ รักเจ้าของมากนะ แต่แค่แสดงออกไม่ค่อยเก่ง หน้าตึงใส่นิดหน่อยแต่มุมอ่อนโยนก็มีเพียบ!", tips: "หาของเล่นให้กัดแทะ และลูบหัวชื่นชมบ่อยๆ" },
+                    B: { title: "ลูกคุณหนูขี้อ้อน", desc: "ติดสกินชิพอันดับหนึ่ง! ขาดความรักไม่ได้เลย ชอบมาคลอเคลีย ทำตาปริบๆ ใส่ แค่เห็นหน้ามนุษย์ก็ใจละลายพร้อมถวายขนมให้แล้ว", tips: "กอดเยอะๆ อุ้มบ่อยๆ และให้ขนมตอนที่ทำตัวน่ารัก" },
+                    C: { title: "บอดี้การ์ดแสนดี", desc: "ตามติดทุกฝีก้าว ซื่อสัตย์ภักดีเป็นที่หนึ่ง ชอบนั่งเฝ้าหน้าห้องน้ำ เป็นเซฟโซนที่แสนอบอุ่นและพึ่งพาได้เสมอ", tips: "ให้พื้นที่เค้าได้อยู่ใกล้ๆ คุณ และพาไปเดินเล่นเปลี่ยนบรรยากาศ" },
+                    D: { title: "ตัวตึงจอมทำลายล้าง", desc: "พลังงานล้นเหลือ วิ่งสู้ฟัด พังทุกอย่างที่ขวางหน้า! สร้างเรื่องปวดหัวให้ทุกวัน แต่ก็สร้างเสียงหัวเราะและความรักให้ครอบครัวแบบสุดๆ", tips: "พาไปวิ่งเล่นออกกำลังกายให้หมดแรง จะได้กลับมาหลับปุ๋ย" }
+                }
+            },
+            cat: {
+                label: "น้องแมว",
+                emoji: "🐱",
+                qrCode: "qr-cat.jpg", // เปลี่ยนชื่อไฟล์รูป QR แมว
+                openChatLink: "ลิงก์โอเพ่นแชทแมว", // ใส่ลิงก์แมว
+                questions: [
+                    { q: "เวลาคุณกำลังตั้งใจทำงานหรือเล่นมือถือ น้องแมว จะ...", A: "เดินมาเหยียบแป้นพิมพ์แล้วนอนทับซะเลย", B: "มานั่งจ้องหน้า เล็งเคอร์เซอร์เมาส์รอตะปบ", C: "นอนขดตัวหลับอยู่ข้างๆ ไม่กวนใจ", D: "ร้องเหมียวๆ เรียกร้องความสนใจไม่หยุด" },
+                    { q: "ถ้าคุณซื้อของเล่นชิ้นใหม่ราคาแพงมาให้...", A: "ดมๆ สองทีแล้วเดินเมินไปนอนที่อื่น", B: "เล่นกระจุยกระจาย พังตั้งแต่วันแรก!", C: "ไม่สนของเล่น แต่ไปนอนในกล่องกระดาษแทน", D: "คาบของเล่นไปซ่อนตามซอกหลืบ" },
+                    { q: "เมื่อมีคนแปลกหน้ามาเยี่ยมบ้าน...", A: "วิ่งไปดมๆ สำรวจ แขกทุกคนคือทาสคนใหม่", B: "ขู่ฟ่อ ขนพอง พร้อมสู้รบ!", C: "วิ่งหายวับไปซ่อนตัวใต้เตียงทันที", D: "นอนที่เดิม ไม่แคร์โลก ใครจะมาก็ช่าง" },
+                    { q: "ท่านอนโปรดของ น้องแมว คือ...", A: "ม้วนตัวกลมป๊อกเป็นก้อนขนมปัง", B: "นอนหงายท้องโชว์พุงขาวๆ", C: "ยืดตัวยาวสุดเหยียดเหมือนของเหลว", D: "ซุกตัวอยู่ในผ้าห่มหรือที่แคบๆ" }
+                ],
+                results: {
+                    A: { title: "พระเอก/นางเอก สายซึน", desc: "หยิ่งยโส รักนะแต่ไม่แสดงออก ปากแข็งแต่จริงๆ ก็แอบห่วงทาสอยู่ห่างๆ", tips: "ปล่อยให้เค้ามีพื้นที่ส่วนตัว ค่อยเข้าไปลูบตอนเค้าอารมณ์ดี" },
+                    B: { title: "ตัวจี๊ดประจำบ้าน", desc: "ซนเป็นที่หนึ่ง พลังงานล้นเหลือ ชอบสร้างตำนานให้ปวดหัวได้ทุกวัน", tips: "หาไม้ตกแมวหรือเลเซอร์มาเล่นด้วยบ่อยๆ ให้หมดแรง" },
+                    C: { title: "นินจาซุ่มเงียบ", desc: "ขี้อาย รักสงบ โลกส่วนตัวสูงปรี๊ด ชอบแอบมองทาสอยู่ตามซอกหลืบ", tips: "เตรียมกล่องกระดาษหรือที่ซ่อนตัวมิดชิดให้เค้าสบายใจ" },
+                    D: { title: "ลูกพี่ใหญ่สายชิล", desc: "อินดี้สุดๆ ไม่แคร์โลก นอนเป็นหลัก ตื่นมากินแล้วก็นอนต่อ", tips: "หาที่นอนนุ่มๆ ริมหน้าต่างให้เค้านอนอาบแดดชิลๆ" }
+                }
+            }
+        };
+
+        // ----------------- ระบบควบคุมการทำงาน -----------------
+        let currentPet = ''; 
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let profile = { name: "", age: "", breed: "", disease:"", weight: "", food: "", imageDataUrl: "" };
+
+        function updateWeightDisplay(val) { document.getElementById('weightDisplay').innerText = val; }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profile.imageDataUrl = e.target.result;
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('uploadText').style.display = 'none';
+                    document.getElementById('uploadSuccess').style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function selectPet(type) {
+            currentPet = type;
+            let petLabel = quizData[type].label;
+            
+            // อัปเดตข้อความในหน้า Intro ให้เป็นไปตามสัตว์ที่เลือก
+            document.getElementById('uploadText').innerText = `📸 กดเพื่ออัปโหลดรูป${petLabel}`;
+            
+            // สลับหน้าจอ
+            document.getElementById('selection').classList.remove('active');
+            document.getElementById('intro').classList.add('active');
+        }
+
+        function startQuiz() {
+            let nameInput = document.getElementById('petName').value.trim();
+            let breedInput = document.getElementById('petBreed').value.trim();
+            let diseaseInput = document.getElementById('petDisease').value.trim() || "-";
+            let foodInput = document.getElementById('petFood').value.trim();
+            let yearSelect = document.getElementById('petAgeYear').value;
+            let monthSelect = document.getElementById('petAgeMonth').value;
+
+            if (!profile.imageDataUrl || nameInput === "" || breedInput === "" || foodInput === "" || yearSelect === "" || monthSelect === "") {
+                alert(`🐾 กรุณาอัปโหลดรูปและกรอกข้อมูลให้ครบทุกช่องก่อนเริ่มควิซนะฮะ`);
+                return; 
+            }
+
+            profile.name = nameInput;
+            let ageString = "";
+            if(yearSelect > 0) ageString += yearSelect + " ปี ";
+            if(monthSelect > 0) ageString += monthSelect + " เดือน";
+            if(yearSelect == 0 && monthSelect == 0) ageString = "ไม่ถึง 1 เดือน";
+            
+            profile.age = ageString.trim();
+            profile.breed = breedInput;
+            profile.disease = diseaseInput;
+            profile.weight = document.getElementById('petWeight').value;
+            profile.food = foodInput;
+
+            if(profile.imageDataUrl) {
+                document.getElementById('res-photo').src = profile.imageDataUrl;
+            }
+
+            // เตรียมแสดงคำถามข้อแรก
+            document.getElementById('intro').classList.remove('active');
+            renderQuestion();
+            document.getElementById('quiz-container').classList.add('active');
+        }
+
+        function renderQuestion() {
+            let qData = quizData[currentPet].questions[currentQuestionIndex];
+            
+            // แทนที่คำว่า "น้องหมา" / "น้องแมว" ด้วยชื่อจริงที่ผู้ใช้กรอก
+            let questionText = qData.q.replace(quizData[currentPet].label, profile.name);
+            
+            document.getElementById('question-text').innerText = `${currentQuestionIndex + 1}. ${questionText}`;
+            document.getElementById('btn-A').innerText = qData.A;
+            document.getElementById('btn-B').innerText = qData.B;
+            document.getElementById('btn-C').innerText = qData.C;
+            document.getElementById('btn-D').innerText = qData.D;
+        }
+
+        function nextQuestion(answer) {
+            userAnswers.push(answer);
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < quizData[currentPet].questions.length) {
+                renderQuestion(); // ไปข้อถัดไป
+            } else {
+                // จบควิซ ไปหน้า Bridge
+                document.getElementById('quiz-container').classList.remove('active');
+                
+                // เซ็ตข้อมูลหน้า Bridge ตามสัตว์ที่เลือก
+                document.getElementById('bridge-text').innerHTML = `อยากหาเพื่อนหรือคนที่ปรึกษาเรื่อง${quizData[currentPet].label}มั้ย<br>แวะสแกน QR Code เข้า OpenChat ก่อนได้นะ!`;
+                document.getElementById('bridge-qr').src = quizData[currentPet].qrCode;
+                document.getElementById('bridge-link').href = quizData[currentPet].openChatLink;
+                document.getElementById('res-link').href = quizData[currentPet].openChatLink;
+
+                document.getElementById('bridge').classList.add('active');
+                
+                // ส่งข้อมูลเข้า Google Sheets
+                let modeAnswer = calculateMode(userAnswers);
+                let resultObj = quizData[currentPet].results[modeAnswer];
+                
+                let dataToSave = {
+                    type: quizData[currentPet].label, // ระบุว่าเป็น หมา หรือ แมว
+                    name: profile.name, 
+                    age: profile.age, 
+                    breed: profile.breed,
+                    weight: profile.weight, 
+                    food: profile.food, 
+                    disease: profile.disease, 
+                    result: resultObj.title
+                };
+
+                // วางลิงก์ Google Sheet Script URL ตรงนี้
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbx2BV0NXpelcwUSiqzLuwOsBpJ4x5o6y3tdqwo3Qu21ZfxeXSQUiq81dETEatQoli-s/exec';
+
+                fetch(scriptURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(dataToSave)
+                })
+                .then(response => console.log('ส่งข้อมูลเข้า Sheets สำเร็จ!'))
+                .catch(error => console.error('Error!', error.message));
+            }
+        }
+
+        function showResult() {
+            document.getElementById('bridge').classList.remove('active');
+            document.getElementById('result').classList.add('active');
+            
+            let modeAnswer = calculateMode(userAnswers);
+            let resData = quizData[currentPet].results[modeAnswer];
+            let emoji = quizData[currentPet].emoji;
+
+            document.getElementById('res-name').innerText = profile.name;
+            document.getElementById('res-title').innerText = resData.title;
+            document.getElementById('res-desc').innerText = resData.desc;
+            document.getElementById('res-tips').innerText = resData.tips;
+            
+            // เปลี่ยน Emoji พื้นหลัง
+            document.getElementById('bg-emoji-1').innerText = emoji;
+            document.getElementById('bg-emoji-2').innerText = emoji;
+            document.getElementById('bg-emoji-3').innerText = emoji;
+            document.getElementById('bg-emoji-4').innerText = emoji;
+            document.getElementById('res-sticker').innerText = emoji;
+        }
+
+        function calculateMode(arr) {
+            let tempArr = [...arr]; 
+            return tempArr.sort((a,b) => tempArr.filter(v => v===a).length - tempArr.filter(v => v===b).length).pop();
+        }
+
+        function downloadImage() {
+            window.scrollTo(0, 0); 
+            const captureArea = document.getElementById('capture-area');
+            html2canvas(captureArea, { backgroundColor: '#FDFBF7', scale: 2, useCORS: true }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = profile.name + '-result.png'; 
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error("แคปรูปไม่สำเร็จ: ", err);
+                alert("🐾 เกิดข้อผิดพลาดตอนเซฟรูป รบกวนเจ้าของแคปหน้าจอแทนไปก่อนน้า");
+            });
+        }
+    </script>
+</body>
+</html>
